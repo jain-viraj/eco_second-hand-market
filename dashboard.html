@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Eco-Finds</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="dashboard-page">
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <i class="fas fa-leaf"></i>
+                <span>Eco-Finds</span>
+            </div>
+            <div class="nav-menu" id="navMenu">
+                <a href="#browse" class="nav-link active" onclick="showSection('browse')">
+                    <i class="fas fa-search"></i>
+                    Browse Items
+                </a>
+                <a href="#upload" class="nav-link" onclick="showSection('upload')">
+                    <i class="fas fa-plus"></i>
+                    Upload Item
+                </a>
+                <a href="#my-items" class="nav-link" onclick="showSection('my-items')">
+                    <i class="fas fa-box"></i>
+                    My Items
+                </a>
+                <a href="#messages" class="nav-link" onclick="showSection('messages')">
+                    <i class="fas fa-comments"></i>
+                    Messages
+                </a>
+            </div>
+            <div class="nav-auth">
+                <div class="user-menu" id="userMenu">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="userName">User</span>
+                    <div class="user-dropdown">
+                        <a href="#" onclick="showSection('profile')"><i class="fas fa-user"></i> Profile</a>
+                        <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Browse Items Section -->
+        <section id="browse" class="content-section active">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Discover Amazing Items</h2>
+                    <p>Find the perfect second-hand items for your needs</p>
+                </div>
+                <div class="search-filters">
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search for items..." id="searchInput">
+                    </div>
+                    <div class="filters">
+                        <select id="categoryFilter">
+                            <option value="">All Categories</option>
+                            <option value="clothing">Clothing</option>
+                            <option value="electronics">Electronics</option>
+                            <option value="furniture">Furniture</option>
+                            <option value="books">Books</option>
+                            <option value="accessories">Accessories</option>
+                            <option value="musical-instruments">Musical Instruments</option>
+                            <option value="home-appliances">Home Appliances</option>
+                            <option value="art-supplies">Art Supplies</option>
+                            <option value="sports-fitness">Sports & Fitness</option>
+                            <option value="home-garden">Home & Garden</option>
+                        </select>
+                        <select id="conditionFilter">
+                            <option value="">All Conditions</option>
+                            <option value="excellent">Excellent</option>
+                            <option value="good">Good</option>
+                            <option value="fair">Fair</option>
+                        </select>
+                        <select id="priceFilter">
+                            <option value="">Any Price</option>
+                            <option value="0-500">Under ₹500</option>
+                            <option value="500-2000">₹500 - ₹2000</option>
+                            <option value="2000-5000">₹2000 - ₹5000</option>
+                            <option value="5000+">Above ₹5000</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="items-grid" id="itemsGrid">
+                    <!-- Items will be dynamically loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Upload Item Section -->
+        <section id="upload" class="content-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Share Your Items</h2>
+                    <p>Upload items you no longer need and give them a second life</p>
+                </div>
+                <div class="upload-form-container">
+                    <div class="upload-form">
+                        <div class="upload-area" id="uploadArea">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Drag & drop your item photos here</p>
+                            <p class="upload-hint">or click to browse</p>
+                            <input type="file" id="imageInput" multiple accept="image/*" style="display: none;">
+                        </div>
+                        <div class="image-preview" id="imagePreview"></div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="itemName">Item Name *</label>
+                                <input type="text" id="itemName" placeholder="Enter item name">
+                            </div>
+                            <div class="form-group">
+                                <label for="itemPrice">Price (₹) *</label>
+                                <input type="number" id="itemPrice" placeholder="Enter price">
+                            </div>
+                            <div class="form-group">
+                                <label for="itemCategory">Category *</label>
+                                <select id="itemCategory">
+                                    <option value="">Select Category</option>
+                                    <option value="clothing">Clothing</option>
+                                    <option value="electronics">Electronics</option>
+                                    <option value="furniture">Furniture</option>
+                                    <option value="books">Books</option>
+                                    <option value="accessories">Accessories</option>
+                                    <option value="musical-instruments">Musical Instruments</option>
+                                    <option value="home-appliances">Home Appliances</option>
+                                    <option value="art-supplies">Art Supplies</option>
+                                    <option value="sports-fitness">Sports & Fitness</option>
+                                    <option value="home-garden">Home & Garden</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="itemCondition">Condition *</label>
+                                <select id="itemCondition">
+                                    <option value="">Select Condition</option>
+                                    <option value="excellent">Excellent</option>
+                                    <option value="good">Good</option>
+                                    <option value="fair">Fair</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="itemDescription">Description *</label>
+                            <textarea id="itemDescription" placeholder="Describe your item in detail..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="itemLocation">Location</label>
+                            <input type="text" id="itemLocation" placeholder="Enter your city">
+                        </div>
+                        <button class="btn-primary btn-large" id="uploadItemBtn">
+                            <i class="fas fa-upload"></i>
+                            Upload Item
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- My Items Section -->
+        <section id="my-items" class="content-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>My Items</h2>
+                    <p>Manage your uploaded items</p>
+                </div>
+                <div class="my-items-grid" id="myItemsGrid">
+                    <!-- User's items will be loaded here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Messages Section -->
+        <section id="messages" class="content-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>Messages</h2>
+                    <p>Communicate with buyers and sellers</p>
+                </div>
+                <div class="messages-container">
+                    <div class="conversations-list" id="conversationsList">
+                        <!-- Conversations will be loaded here -->
+                    </div>
+                    <div class="chat-container" id="chatContainer">
+                        <div class="chat-header">
+                            <h3 id="chatTitle">Select a conversation</h3>
+                        </div>
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="no-chat">
+                                <i class="fas fa-comments"></i>
+                                <p>Select a conversation to start chatting</p>
+                            </div>
+                        </div>
+                        <div class="chat-input" id="chatInput" style="display: none;">
+                            <input type="text" id="messageInput" placeholder="Type your message...">
+                            <button id="sendMessageBtn"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Profile Section -->
+        <section id="profile" class="content-section">
+            <div class="container">
+                <div class="section-header">
+                    <h2>My Profile</h2>
+                    <p>Manage your account settings</p>
+                </div>
+                <div class="profile-container">
+                    <div class="profile-card">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="profile-info">
+                            <h3 id="profileName">User Name</h3>
+                            <p id="profileEmail">user@example.com</p>
+                            <p id="profileJoinDate">Member since January 2024</p>
+                        </div>
+                    </div>
+                    <div class="profile-stats">
+                        <div class="stat-card">
+                            <i class="fas fa-box"></i>
+                            <span class="stat-number" id="itemsCount">0</span>
+                            <span class="stat-label">Items Listed</span>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-comments"></i>
+                            <span class="stat-number" id="messagesCount">0</span>
+                            <span class="stat-label">Messages</span>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-heart"></i>
+                            <span class="stat-number" id="likesCount">0</span>
+                            <span class="stat-label">Likes Received</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Item Detail Modal -->
+    <div class="modal" id="itemDetailModal">
+        <div class="modal-content item-detail-modal">
+            <div class="modal-header">
+                <h3 id="itemDetailTitle">Item Details</h3>
+                <button class="close-btn" onclick="closeItemDetail()">&times;</button>
+            </div>
+            <div class="item-detail-content" id="itemDetailContent">
+                <!-- Item details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="messageContainer"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
