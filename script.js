@@ -3,6 +3,7 @@ let currentUser = null;
 let items = [];
 let currentChatItem = null;
 let conversations = [];
+let cart = []; // Flag to switch between localStorage and database
 
 // Sample data for demonstration
 const sampleItems = [
@@ -286,8 +287,8 @@ function initializeApp() {
         currentUser = JSON.parse(savedUser);
         updateUserInterface();
     }
-    
-    // Load saved items
+
+    // Load items
     const savedItems = localStorage.getItem('items');
     if (savedItems) {
         items = JSON.parse(savedItems);
@@ -295,12 +296,21 @@ function initializeApp() {
         items = [...sampleItems];
         localStorage.setItem('items', JSON.stringify(items));
     }
-    
+
     // Load conversations
     const savedConversations = localStorage.getItem('conversations');
     if (savedConversations) {
         conversations = JSON.parse(savedConversations);
     }
+
+    // Load cart
+    const savedCart = localStorage.getItem('cart');
+    if (savedCart) {
+        cart = JSON.parse(savedCart);
+    }
+
+    // Update cart count on page load
+    updateCartCount();
 }
 
 function setupEventListeners() {
@@ -312,7 +322,7 @@ function setupEventListeners() {
             }
         });
         
-        document.getElementById('closeAuthModal')?.addEventListener('click', closeAuthModal);
+        // Close button is handled by onclick in HTML
         document.getElementById('loginForm')?.addEventListener('submit', handleLogin);
         document.getElementById('signupForm')?.addEventListener('submit', handleSignup);
     }
@@ -366,6 +376,10 @@ function loadDashboardData() {
 function showAuthModal() {
     document.getElementById('authModal').style.display = 'block';
     document.body.style.overflow = 'hidden';
+}
+
+function openAuthModal() {
+    showAuthModal(); // Use the same function
 }
 
 function closeAuthModal() {
@@ -495,6 +509,10 @@ function showSection(sectionId) {
         loadConversations();
     } else if (sectionId === 'profile') {
         updateProfileStats();
+    } else if (sectionId === 'cart') {
+        displayCartItems();
+    } else if (sectionId === 'payment') {
+        displayOrderItems();
     }
 }
 
@@ -518,6 +536,7 @@ function displayItems(itemsToShow) {
 function createItemCard(item) {
     const card = document.createElement('div');
     card.className = 'item-card';
+    const isInCart = cart.some(cartItem => cartItem.id === item.id);
     card.innerHTML = `
         <img src="${item.image}" alt="${item.title}" class="item-image">
         <div class="item-content">
@@ -539,6 +558,10 @@ function createItemCard(item) {
                 <button class="btn-contact" onclick="startConversation(${item.id})">
                     <i class="fas fa-comments"></i>
                     Contact Seller
+                </button>
+                <button class="btn-cart ${isInCart ? 'in-cart' : ''}" onclick="toggleCart(${item.id})">
+                    <i class="fas fa-${isInCart ? 'check' : 'shopping-cart'}"></i>
+                    ${isInCart ? 'In Cart' : 'Add to Cart'}
                 </button>
             </div>
         </div>
@@ -606,6 +629,7 @@ function handleItemUpload() {
     const location = document.getElementById('itemLocation').value;
     const images = document.getElementById('imageInput').files;
     
+    
     if (!name || !description || !price || !category || !condition) {
         showMessage('Please fill in all required fields', 'error');
         return;
@@ -638,10 +662,15 @@ function handleItemUpload() {
     showMessage('Item uploaded successfully!', 'success');
     
     // Refresh browse section to show new item
-    showSection('browse');
     setTimeout(() => {
-        filterItems(); // Refresh the items display
+        showSection('browse');
+        displayItems(items); // Refresh the items display
     }, 100);
+    
+    // Also refresh my items section
+    setTimeout(() => {
+        loadMyItems();
+    }, 200);
 }
 
 function resetUploadForm() {
@@ -908,6 +937,197 @@ function updateProfileStats() {
     document.getElementById('itemsCount').textContent = myItems.length;
     document.getElementById('messagesCount').textContent = myMessages;
     document.getElementById('likesCount').textContent = Math.floor(Math.random() * 50);
+}
+
+function toggleCart(itemId) {
+    
+    if (!currentUser) {
+        showMessage('Please sign in to add items to cart', 'error');
+        return;
+    }
+    
+    const item = items.find(i => i.id === itemId);
+    if (!item) return;
+    
+    const existingItemIndex = cart.findIndex(cartItem => cartItem.id === itemId);
+    
+    if (existingItemIndex > -1) {
+        // Remove from cart
+        cart.splice(existingItemIndex, 1);
+        showMessage('Item removed from cart', 'success');
+    } else {
+        // Add to cart
+        cart.push(item);
+        showMessage('Item added to cart!', 'success');
+    }
+    
+    // Save cart to localStorage
+    localStorage.setItem('cart', JSON.stringify(cart));
+    
+    // Update cart count
+    updateCartCount();
+    
+    // Refresh the items display to update cart button states
+    if (document.getElementById('itemsGrid')) {
+        filterItems();
+    }
+}
+
+function updateCartCount() {
+    const cartCountElement = document.getElementById('cartCount');
+    if (cartCountElement) {
+        cartCountElement.textContent = cart.length;
+    }
+}
+
+function showCart() {
+    showSection('cart');
+    // Force display cart items immediately
+    displayCartItems();
+}
+
+function displayCartItems() {
+    const cartItemsContainer = document.getElementById('cartItems');
+    const cartTotalElement = document.getElementById('cartTotal');
+    
+    
+    if (!cartItemsContainer) return;
+    
+    if (cart.length === 0) {
+        cartItemsContainer.innerHTML = `
+            <div class="empty-cart">
+                <i class="fas fa-shopping-cart"></i>
+                <h3>Your cart is empty</h3>
+                <p>Add some items to get started!</p>
+                <button class="btn-primary" onclick="showSection('browse')">
+                    <i class="fas fa-search"></i>
+                    Browse Items
+                </button>
+            </div>
+        `;
+        if (cartTotalElement) cartTotalElement.textContent = '0';
+        return;
+    }
+    
+    cartItemsContainer.innerHTML = '';
+    let total = 0;
+    
+    cart.forEach(item => {
+        const cartItem = document.createElement('div');
+        cartItem.className = 'cart-item';
+        cartItem.innerHTML = `
+            <img src="${item.image}" alt="${item.title}" class="cart-item-image">
+            <div class="cart-item-info">
+                <h4>${item.title}</h4>
+                <p>${item.description}</p>
+                <div class="cart-item-meta">
+                    <span class="cart-item-price">₹${item.price.toLocaleString()}</span>
+                    <span class="cart-item-condition">${item.condition}</span>
+                </div>
+            </div>
+            <button class="btn-remove" onclick="removeFromCart(${item.id})">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+        cartItemsContainer.appendChild(cartItem);
+        total += item.price;
+    });
+    
+    if (cartTotalElement) cartTotalElement.textContent = total.toLocaleString();
+}
+
+function removeFromCart(itemId) {
+    const itemIndex = cart.findIndex(item => item.id === itemId);
+    if (itemIndex > -1) {
+        cart.splice(itemIndex, 1);
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartCount();
+        displayCartItems();
+        filterItems(); // Refresh browse page
+        showMessage('Item removed from cart', 'success');
+    }
+}
+
+function checkout() {
+    if (cart.length === 0) {
+        showMessage('Your cart is empty!', 'error');
+        return;
+    }
+    
+    showSection('payment');
+    displayOrderItems();
+}
+
+function displayOrderItems() {
+    const orderItemsContainer = document.getElementById('orderItems');
+    const subtotalElement = document.getElementById('subtotal');
+    const finalTotalElement = document.getElementById('finalTotal');
+    
+    if (!orderItemsContainer) return;
+    
+    orderItemsContainer.innerHTML = '';
+    let subtotal = 0;
+    
+    cart.forEach(item => {
+        const orderItem = document.createElement('div');
+        orderItem.className = 'order-item';
+        orderItem.innerHTML = `
+            <img src="${item.image}" alt="${item.title}" class="order-item-image">
+            <div class="order-item-info">
+                <h4>${item.title}</h4>
+                <p>Condition: ${item.condition}</p>
+                <span class="order-item-price">₹${item.price.toLocaleString()}</span>
+            </div>
+        `;
+        orderItemsContainer.appendChild(orderItem);
+        subtotal += item.price;
+    });
+    
+    const shipping = 50;
+    const total = subtotal + shipping;
+    
+    if (subtotalElement) subtotalElement.textContent = `₹${subtotal.toLocaleString()}`;
+    if (finalTotalElement) finalTotalElement.textContent = `₹${total.toLocaleString()}`;
+}
+
+function processPayment() {
+    const cardNumber = document.getElementById('cardNumber').value;
+    const expiryDate = document.getElementById('expiryDate').value;
+    const cvv = document.getElementById('cvv').value;
+    const cardName = document.getElementById('cardName').value;
+    const billingAddress = document.getElementById('billingAddress').value;
+    
+    if (!cardNumber || !expiryDate || !cvv || !cardName || !billingAddress) {
+        showMessage('Please fill in all payment fields', 'error');
+        return;
+    }
+    
+    // Simulate payment processing
+    showMessage('Processing payment...', 'info');
+    
+    setTimeout(() => {
+        // Clear cart after successful payment
+        cart = [];
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartCount();
+        
+        showMessage('Payment successful! Your order has been placed.', 'success');
+        
+        // Reset payment form
+        document.getElementById('paymentForm').reset();
+        
+        // Go back to browse section
+        setTimeout(() => {
+            showSection('browse');
+        }, 2000);
+    }, 2000);
+}
+
+// Test function to manually add first item to cart
+function testAddToCart() {
+    if (items.length > 0) {
+        toggleCart(items[0].id);
+    }
 }
 
 function logout() {

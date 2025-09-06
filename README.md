@@ -37,7 +37,7 @@ Eco-Finds is a comprehensive web application designed to give items a second lif
 
 ### Prerequisites
 - A modern web browser
-- Python 3.x (for local server) or Node.js (for npm server)
+- Node.js (for database server) or Python 3.x (for simple server)
 
 ### Installation
 
@@ -47,25 +47,39 @@ Eco-Finds is a comprehensive web application designed to give items a second lif
    cd eco_second-hand-market
    ```
 
-2. **Run the application**
-   
-   **Option 1: Python Server**
-   ```bash
-   python -m http.server 8000
-   ```
-   
-   **Option 2: Node.js Server**
+2. **Install dependencies (for database version)**
    ```bash
    npm install
-   npm run dev
    ```
+
+3. **Run the application**
+   
+   **Option 1: With Database (Recommended)**
+   ```bash
+   npm start
+   # or
+   npm run server
+   ```
+   - This starts the Node.js server with database at `http://localhost:3000`
+   - Includes persistent data storage, user authentication, and cart functionality
+   
+   **Option 2: Simple Server (No Database)**
+   ```bash
+   npm run dev
+   # or
+   python -m http.server 8000
+   ```
+   - This starts a simple HTTP server at `http://localhost:8000`
+   - Uses localStorage for data (data lost on browser clear)
    
    **Option 3: Direct File Opening**
    - Simply open `index.html` in your web browser
+   - Limited functionality, uses localStorage only
 
-3. **Access the application**
-   - Open your browser and go to `http://localhost:8000`
-   - Or open `index.html` directly
+4. **Access the application**
+   - **With Database**: `http://localhost:3000`
+   - **Simple Server**: `http://localhost:8000`
+   - **Direct File**: Open `index.html` directly
 
 ## 📱 How to Use
 
